@@ -3436,6 +3436,32 @@ Finally, for cloud or microservices environments, I would use Auto Scaling with 
 So overall, Spring Boot performance optimization is achieved by combining caching, database tuning, async processing, monitoring, proper resource management, and scalable architecture together.”
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Why Spring Boot is Preferred for Microservices
+* Auto-configuration
+* Embedded servers
+* Production-ready metrics
+* Integration with Spring Cloud
+* Lightweight, fast
+* Large community & ecosystem
+
+                                                          Spring Boot with   Splunk  Tutorial 
+
+
+Splunk allows you to monitor , search and analysis  data and logs through a web interface
+
+Realtime Example :   Lets example we have three micro services  and the services name order , inventory , payment service . If any one  of service was failure the firstly we are checking the logs right but the problem is all services combined one folder , so its very difficult to find out the issue in logs … to resolve this Splunk comes into application . We will create each service separate  slunk index and we will easily find out each service logs . To connect splunk our application  we need to add log4j .xml file Url ,Host ,token , index ,source
+
+Dynatrace : add env variables in spring boot applications	, once added in spring boot we could see all service in Dynatrace. We could see all services response time in dynatrace .for all services seed code executions , waiting , network and also any db config activity, its monitoring each service response and cpu analysis the query 
+
+Dynatrace is a software platform and its completely monitoring applications , squirts , auto machine will provide, using dynatrace to improve the application performance  
+
+APIGateWay
+ 
+First we create a enruka server project and required fields to add in pom.xml like eureka server dependency , @enableEnrukaserver , some properties in application properties file
+Second we create multiple service and config enruka server , we add both services  required  enruka discory client dependency , @enableEnrukaclient annotations , in yml file we need add enruka server config ,  in that services
+
+Now , we create APIGateWay service add dependency enrukadiscoryclient ,gateway .pom xml file. Once done we configure the above both services in apigate applications
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
