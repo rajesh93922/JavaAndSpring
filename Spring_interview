@@ -83,6 +83,15 @@ In Spring, IoC is primarily achieved through **Dependency Injection (DI).This is
 
 -----------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------
+3. How is Spring Boot different from Spring?
+Feature	Spring Framework	Spring Boot
+Setup	Manual configuration (XML or Java-based)	Auto-configuration, no XML
+Dependencies	Add individually	Comes with embedded dependencies
+Web Server	Requires external (like Tomcat)	Has embedded servers like Tomcat, Jetty
+Entry Point	No standard entry point	Uses main() method (auto-run)
+Complexity	More boilerplate	Rapid development, less boilerplate
+Use Case	For full control over every config	For fast microservice development
+
 4. Types of IoC Containers
 Container	Description
 BeanFactory	Basic container, lazy loading.
@@ -1050,6 +1059,2762 @@ So overall:
 
 * `@Component` is used for generic bean registration
 * `@Configuration` is used for explicit bean configuration with proxy-managed `@Bean` methods and singleton handling internally.”
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question: What is the role of `@SpringBootApplication`?
+
+Main points:
+
+1. Main Entry Point
+2. Combination of Annotations
+3. Auto Configuration
+4. Component Scanning
+5. Configuration Support
+6. IOC Container Initialization
+7. Embedded Server Startup
+8. Internal Working
+
+Explanation:
+
+First, `@SpringBootApplication` is the main annotation used to start a Spring Boot application. It acts as the central configuration annotation for the application.
+
+Example:
+
+```java id="k3m8px"
+@SpringBootApplication
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+```
+
+This annotation tells Spring Boot to start the application and initialize all required Spring components.
+
+Second, internally `@SpringBootApplication` is actually a combination of three important annotations:
+
+* `@Configuration`
+* `@EnableAutoConfiguration`
+* `@ComponentScan`
+
+Spring combines these three annotations into a single annotation for developer convenience.
+
+Third, `@Configuration` allows the class to act as a configuration class. It tells Spring that this class can contain bean definitions and application configurations.
+
+Fourth, `@EnableAutoConfiguration` is one of the most powerful features. It allows Spring Boot to automatically configure the application based on dependencies available in the classpath.
+
+For example:
+
+* If Spring Web dependency is present → Spring configures DispatcherServlet and Tomcat automatically
+* If JPA dependency is present → Spring configures DataSource, Hibernate, and TransactionManager automatically
+
+This reduces huge amounts of manual configuration.
+
+Fifth, `@ComponentScan` tells Spring to scan packages and automatically detect Spring-managed components such as:
+
+* `@Component`
+* `@Service`
+* `@Repository`
+* `@Controller`
+
+Spring then creates beans for those classes and stores them inside the IOC Container.
+
+Sixth, internally during application startup, Spring Boot initializes the IOC Container and starts registering beans, configurations, properties, and dependencies.
+
+It also resolves:
+
+* Profiles
+* Property files
+* Auto configurations
+* Bean dependencies
+
+Seventh, Spring Boot automatically starts the Embedded Server such as:
+
+* Tomcat
+* Jetty
+* Undertow
+
+This is why we can directly run Spring Boot applications as standalone JAR files without deploying WAR files externally.
+
+Finally, the internal startup flow works like this:
+
+1. Main method executes
+2. `SpringApplication.run()` starts
+3. IOC Container gets created
+4. Component scanning happens
+5. Auto configuration starts
+6. Beans are initialized
+7. Embedded server starts
+8. Application becomes ready
+
+So overall, `@SpringBootApplication` acts as the central bootstrap annotation that enables auto configuration, component scanning, configuration management, IOC container initialization, and embedded server startup in Spring Boot.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question: What is an Embedded Server in Spring Boot?
+
+Main points:
+
+1. Built-in Web Server
+2. No External Deployment Required
+3. Embedded Tomcat
+4. Application Startup Process
+5. Standalone Application
+6. Internal Working
+7. Supported Servers
+8. Real-Time Benefits
+
+Explanation:
+
+First, an Embedded Server is a web server that comes built inside the Spring Boot application itself. We do not need to install or configure an external server separately.
+
+In traditional Spring applications, we usually package the application as a WAR file and deploy it into external servers like:
+
+* Tomcat
+* WebSphere
+* JBoss
+
+But in Spring Boot, the server is already included inside the application.
+
+Second, Spring Boot commonly uses Embedded Tomcat by default. When we add:
+
+```xml id="p7m2qx"
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
+
+Spring Boot automatically downloads and configures Tomcat internally.
+
+Third, during application startup, Spring Boot starts the embedded server automatically.
+
+Example:
+
+```java id="k8r3zn"
+@SpringBootApplication
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+```
+
+When this application runs:
+
+* IOC Container initializes
+* Beans are created
+* Embedded Tomcat starts automatically
+* Application becomes accessible on a port like `8080`
+
+Fourth, because the server is embedded inside the application, Spring Boot applications become Standalone Applications.
+
+That means:
+
+* No manual deployment required
+* No external server setup
+* Just run the JAR file
+
+Example:
+
+```bash id="v4x1dp"
+java -jar app.jar
+```
+
+The application starts with its own internal server.
+
+Fifth, internally Spring Boot uses Auto Configuration to configure the embedded server.
+
+When Spring Boot detects:
+
+* `spring-boot-starter-web`
+
+It automatically:
+
+* Creates Tomcat server object
+* Configures DispatcherServlet
+* Registers servlet mappings
+* Starts HTTP listener on configured port
+
+All this happens internally without manual XML configuration.
+
+Sixth, Spring Boot supports multiple embedded servers such as:
+
+* Tomcat (default)
+* Jetty
+* Undertow
+
+We can change the server by replacing dependencies.
+
+Seventh, in real-time projects, embedded servers provide major advantages:
+
+* Faster deployment
+* Easier microservice development
+* Simplified DevOps
+* Easier Docker/Kubernetes deployment
+* Environment consistency
+
+Especially in Microservices Architecture, standalone executable applications are very useful.
+
+Finally, the startup flow internally works like this:
+
+1. Application starts
+2. Spring Boot initializes IOC Container
+3. Auto configuration detects web dependency
+4. Embedded server object gets created
+5. Server starts on configured port
+6. DispatcherServlet handles incoming HTTP requests
+
+So overall, an Embedded Server in Spring Boot is an internally packaged web server like Tomcat that allows applications to run as standalone executable applications without requiring external deployment.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Diff b/w application.yml and properties file
+Question: Difference between `application.properties` and `application.yml`
+
+Main points:
+
+1. Syntax Difference
+2. Readability
+3. Hierarchical Configuration
+4. Duplicate Configuration Handling
+5. File Size and Maintainability
+6. Internal Working
+7. Real-Time Usage
+
+Explanation:
+
+First, the main difference between `application.properties` and `application.yml` is the syntax format.
+
+`application.properties` uses:
+
+* Key-value pair format
+
+Example:
+
+```properties id="p8m2qx"
+server.port=8080
+spring.datasource.url=jdbc:mysql://localhost:3306/test
+```
+
+Whereas `application.yml` uses:
+
+* YAML format with indentation
+
+Example:
+
+```yaml id="r5k9zn"
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/test
+```
+
+Second, `application.yml` is generally more readable for large configurations because it supports hierarchical structure naturally.
+
+In properties files, nested configurations become long and repetitive.
+
+Example in properties:
+
+```properties id="n3v7ld"
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+```
+
+But YAML groups related configurations together, making it cleaner.
+
+Third, YAML handles Hierarchical Configuration much better.
+
+For complex applications like:
+
+* Microservices
+* Kafka configurations
+* Security settings
+
+YAML becomes easier to manage because configurations are visually structured.
+
+Fourth, in `.properties` files, duplicate prefixes are repeated many times, which increases verbosity.
+
+Example:
+
+```properties id="y6t1pk"
+app.mail.host=
+app.mail.port=
+app.mail.username=
+```
+
+In YAML:
+
+```yaml id="k2q8mn"
+app:
+  mail:
+    host:
+    port:
+    username:
+```
+
+This reduces duplication and improves maintainability.
+
+Fifth, for smaller applications, `application.properties` is often simpler and easier for beginners because the syntax is straightforward.
+
+But in enterprise-level applications with large configurations, many teams prefer YAML because it is cleaner and more organized.
+
+Sixth, internally both files work exactly the same way in Spring Boot.
+
+Spring Boot loads both formats into the same Environment object internally.
+
+There is no performance difference between them.
+
+Spring converts both configurations into key-value pairs internally during application startup.
+
+Finally, in real-time projects:
+
+* Small projects commonly use `application.properties`
+* Large microservices-based systems often use `application.yml`
+
+Especially in Kubernetes and cloud-native environments, YAML is widely used because Kubernetes itself heavily uses YAML configurations.
+
+So overall:
+
+* `application.properties` is simple and flat
+* `application.yml` is cleaner, hierarchical, and better for complex configurations”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question: What is a `spring-boot-starter`?
+
+Main points:
+
+1. Predefined Dependency Package
+2. Simplifies Dependency Management
+3. Auto Configuration Support
+4. Reduces Boilerplate Setup
+5. Common Starters
+6. Internal Working
+7. Real-Time Usage
+
+Explanation:
+
+First, a `spring-boot-starter` is a predefined dependency package provided by Spring Boot that contains a group of related libraries required for a specific feature.
+
+Instead of adding multiple dependencies manually, Spring Boot provides starter dependencies that bundle everything together.
+
+For example:
+
+```xml id="x4m8qp"
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
+
+By adding just this one dependency, Spring Boot automatically includes:
+
+* Spring MVC
+* Jackson
+* Validation libraries
+* Embedded Tomcat
+* Logging dependencies
+
+Second, starters simplify Dependency Management. Without starters, developers would need to manually identify compatible versions for many libraries.
+
+Spring Boot starters provide:
+
+* Compatible dependency versions
+* Preconfigured setup
+* Reduced configuration effort
+
+This avoids version conflicts between libraries.
+
+Third, starters work closely with Spring Boot Auto Configuration.
+
+When Spring Boot detects a starter dependency in the classpath, it automatically configures related beans internally.
+
+For example:
+
+* `spring-boot-starter-web`
+  → Configures DispatcherServlet, Tomcat, Spring MVC
+
+* `spring-boot-starter-data-jpa`
+  → Configures Hibernate, DataSource, TransactionManager
+
+This is one of the main reasons Spring Boot development becomes very fast.
+
+Fourth, starters reduce Boilerplate Configuration significantly.
+
+Without starters:
+
+* We manually add many dependencies
+* Configure XML files
+* Configure server setup
+
+With starters:
+
+* Most configurations happen automatically
+
+Developers can focus more on business logic instead of infrastructure setup.
+
+Fifth, some commonly used starters are:
+
+* `spring-boot-starter-web`
+  → REST APIs and web applications
+
+* `spring-boot-starter-data-jpa`
+  → Database and Hibernate support
+
+* `spring-boot-starter-security`
+  → Authentication and authorization
+
+* `spring-boot-starter-test`
+  → Unit testing support
+
+* `spring-boot-starter-actuator`
+  → Monitoring and health checks
+
+Sixth, internally Spring Boot starters mainly work using:
+
+* Maven/Gradle dependency management
+* Auto Configuration
+* Conditional bean creation
+
+Spring Boot checks:
+
+* Which starter dependencies are present
+* Which classes exist in classpath
+
+Then it automatically configures required beans and services.
+
+Finally, in real-time projects, starters help teams:
+
+* Set up projects quickly
+* Maintain dependency consistency
+* Reduce manual configurations
+* Speed up development
+
+So overall, a `spring-boot-starter` is a predefined dependency bundle that simplifies project setup by automatically providing compatible libraries and configurations for specific functionalities in Spring Boot applications.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question: What is Spring Boot Actuator?
+
+Main points:
+
+1. Production Monitoring
+2. Health Checks
+3. Metrics Collection
+4. Management Endpoints
+5. Application Monitoring
+6. Security Management
+7. Internal Working
+8. Real-Time Usage
+
+Explanation:
+
+First, Spring Boot Actuator is mainly used for Production Monitoring and Management. In real-world applications, once the application is deployed, we need to continuously monitor its health, performance, and runtime behavior. Actuator provides built-in production-ready features for this purpose.
+
+Second, for Health Checks, Spring Boot Actuator provides endpoints like `/actuator/health`. This endpoint tells whether the application is running properly or not. It can also verify dependencies such as database connectivity, disk space availability, and external service status. This is extremely useful in production support environments.
+
+Third, for Metrics Collection, Actuator provides runtime metrics such as CPU usage, memory consumption, thread count, HTTP request statistics, API response times, and JVM details. These metrics help identify performance bottlenecks and system health issues before they impact users.
+
+Fourth, for Management Endpoints, Actuator exposes several ready-made endpoints like:
+
+* `/health`
+* `/metrics`
+* `/info`
+* `/beans`
+* `/env`
+
+These endpoints help developers and DevOps teams inspect the internal state of the application without manually writing monitoring APIs.
+
+Fifth, for Application Monitoring, Actuator integrates with monitoring tools like Prometheus and Grafana. In enterprise systems, teams use dashboards to monitor application performance in real time. This helps track failures, slow APIs, memory leaks, and unusual traffic patterns.
+
+Sixth, for Security Management, Actuator endpoints are usually protected because they expose sensitive application details. In production environments, we expose only required endpoints and secure them using Spring Security to prevent unauthorized access.
+
+Seventh, internally Spring Boot Actuator works using Auto Configuration and Micrometer Metrics Library. When the Actuator dependency is added, Spring automatically creates monitoring beans and registers management endpoints inside the application context. Actuator continuously collects runtime information from:
+
+* JVM
+* Spring IOC Container
+* HTTP requests
+* System resources
+
+Finally, in real-time projects, Spring Boot Actuator is heavily used in Microservices and Cloud environments. For example, Kubernetes continuously calls `/actuator/health` to check whether the application pod is healthy. If the health check fails, Kubernetes can automatically restart the application instance.
+
+So overall, Spring Boot Actuator helps monitor, manage, and observe Spring Boot applications in production environments using health checks, metrics, and management endpoints.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question: Difference between `CrudRepository` and `JpaRepository`
+
+Main points:
+
+1. Basic Purpose
+2. CRUD Operations
+3. JPA-Specific Features
+4. Pagination and Sorting
+5. Batch Operations
+6. Flush Operations
+7. Internal Hierarchy
+8. Real-Time Usage
+
+Explanation:
+
+First, `CrudRepository` is mainly used for basic CRUD operations such as:
+
+* Save
+* Find
+* Update
+* Delete
+
+It provides minimal functionality required for database operations.
+
+Example:
+
+```java id="x4m8qp"
+public interface UserRepository 
+       extends CrudRepository<User, Long> {
+}
+```
+
+This is sufficient for simple applications where only basic database operations are needed.
+
+Second, `JpaRepository` is an advanced repository that extends:
+
+* `CrudRepository`
+* `PagingAndSortingRepository`
+
+It provides all CRUD operations along with additional JPA-specific features.
+
+Example:
+
+```java id="k7r2zn"
+public interface UserRepository 
+       extends JpaRepository<User, Long> {
+}
+```
+
+This is more commonly used in enterprise applications.
+
+Third, for CRUD Operations, both repositories support methods like:
+
+* `save()`
+* `findById()`
+* `deleteById()`
+* `findAll()`
+
+So basic database operations are available in both.
+
+Fourth, `JpaRepository` provides additional JPA-Specific Features that are not available in `CrudRepository`.
+
+Examples:
+
+* `flush()`
+* `saveAndFlush()`
+* `deleteInBatch()`
+* `deleteAllInBatch()`
+
+These methods help manage persistence context and batch processing efficiently.
+
+Fifth, for Pagination and Sorting, `JpaRepository` supports advanced features through inherited interfaces.
+
+Example:
+
+```java id="m5q8nd"
+Page<User> findAll(Pageable pageable);
+```
+
+This is very useful when handling large datasets in enterprise applications.
+
+`CrudRepository` does not directly provide advanced pagination support.
+
+Sixth, `JpaRepository` supports Batch Operations. In large-scale systems, batch processing improves performance by reducing database round trips.
+
+For example:
+
+* Batch delete
+* Batch save
+* Bulk operations
+
+These are commonly used in high-volume applications.
+
+Seventh, internally the hierarchy works like this:
+
+```text id="t8v3pk"
+CrudRepository
+       ↓
+PagingAndSortingRepository
+       ↓
+JpaRepository
+```
+
+This means:
+
+* `JpaRepository` contains all features of `CrudRepository`
+* Plus additional JPA and pagination capabilities
+
+Finally, in real-time projects:
+
+* `CrudRepository` is mostly used in simple or small applications
+* `JpaRepository` is preferred in enterprise applications because it provides:
+
+  * Pagination
+  * Sorting
+  * Batch processing
+  * Better JPA integration
+
+So overall:
+
+* `CrudRepository` provides basic CRUD functionality
+* `JpaRepository` provides advanced JPA features, pagination, sorting, and batch operations on top of CRUD functionality.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+26. What Is Custom Error Handling in Spring Boot?
+Spring Boot provides a default error response (/error), but for better control, we often define our own:
+* Custom error messages
+* Friendly JSON structure
+* Centralized exception handling
+
+🔹 Use Case:
+“When an exception occurs (like resource not found), I want to return a clean and meaningful error message instead of the default HTML or stack trace.”
+
+🛠️ Step-by-Step: Custom Error Handling
+✅ 1. Create a Custom Exception
+public class UserNotFoundException extends RuntimeException {
+    public UserNotFoundException(String message) {
+        super(message);
+    }
+}
+
+✅ 2. Create a Global Exception Handler
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericException(Exception ex) {
+        return new ResponseEntity<>("Something went wrong!", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+@RestControllerAdvice = Applies to all controllers @ExceptionHandler = Handles specific exceptions
+
+✅ 3. Use in Controller
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    @GetMapping("/{id}")
+    public String getUser(@PathVariable int id) {
+        if (id != 1) {
+            throw new UserNotFoundException("User with ID " + id + " not found");
+        }
+        return "User found";
+    }
+}
+
+🧪 Sample Output
+If you hit /users/2, you'll get:
+{
+  "message": "User with ID 2 not found"
+}
+
+🗣️ Interview Summary:
+“We use @RestControllerAdvice and @ExceptionHandler to define centralized, clean error responses. This improves API consistency and makes debugging easier.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 1. What is Auto-Configuration?
+
+Main points:
+
+1. Automatic Configuration
+2. Dependency-Based Setup
+3. Reduces Manual Configuration
+4. Uses Classpath Detection
+5. Internal Working
+
+Explanation:
+
+“Auto-Configuration is one of the main features of Spring Boot. It automatically configures the application based on the dependencies available in the project.
+
+For example, if I add `spring-boot-starter-web`, Spring Boot automatically configures:
+
+* Tomcat
+* DispatcherServlet
+* Spring MVC
+
+I don’t need to configure them manually.
+
+Similarly, if I add JPA dependency, Spring Boot automatically configures:
+
+* DataSource
+* Hibernate
+* Transaction Manager
+
+Internally, Spring Boot checks the classpath and identifies which libraries are present. Based on that, it automatically creates required beans and configurations.
+
+This reduces boilerplate configuration and speeds up development.”
+
+---
+
+# 2. What are Spring Boot Profiles?
+
+Main points:
+
+1. Environment-Based Configuration
+2. Separate Configurations
+3. Active Profile
+4. Bean Loading
+5. Real-Time Usage
+
+Explanation:
+
+“Spring Boot Profiles are used to manage different environment configurations such as:
+
+* Development
+* Testing
+* Production
+
+Each environment may require different:
+
+* Database URLs
+* Credentials
+* Logging levels
+
+Using profiles, we can create separate configuration files like:
+
+* `application-dev.properties`
+* `application-prod.properties`
+
+Then we activate a profile using:
+
+```properties id="x4m8qp"
+spring.profiles.active=dev
+```
+
+Spring Boot automatically loads configurations related to the active profile.
+
+Profiles can also control bean creation using `@Profile` annotation.
+
+This helps keep environment configurations clean and avoids changing code manually for different environments.”
+
+---
+
+# 3. Difference between `@RestController` and `@Controller`
+
+Main points:
+
+1. Purpose
+2. Response Type
+3. View Resolution
+4. REST API Usage
+5. Internal Behavior
+
+Explanation:
+
+“`@Controller` is mainly used for traditional Spring MVC applications where we return JSP or HTML pages.
+
+Example:
+
+* Returning login page
+* Returning UI views
+
+`@RestController` is mainly used for REST APIs where methods return JSON or XML responses directly.
+
+Internally, `@RestController` is a combination of:
+
+* `@Controller`
+* `@ResponseBody`
+
+Because of `@ResponseBody`, Spring automatically converts Java objects into JSON responses.
+
+So:
+
+* `@Controller` → used for Views
+* `@RestController` → used for REST APIs”
+
+---
+
+# 4. What is Spring Boot DevTools?
+
+Main points:
+
+1. Developer Productivity
+2. Automatic Restart
+3. Live Reload
+4. Faster Development
+5. Internal Working
+
+Explanation:
+
+“Spring Boot DevTools is a development utility module that improves developer productivity.
+
+Its main feature is Automatic Restart.
+
+Whenever code changes are detected, the application automatically restarts without manually stopping and starting the server.
+
+It also supports Live Reload, where browser changes are refreshed automatically.
+
+Example:
+
+```xml id="k7r2zn"
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+</dependency>
+```
+
+Internally, DevTools monitors classpath changes and triggers application restart when code modifications happen.
+
+This speeds up development and testing significantly.”
+
+---
+
+# 5. Role of `@EnableAutoConfiguration`
+
+Main points:
+
+1. Enables Auto Configuration
+2. Dependency Detection
+3. Automatic Bean Creation
+4. Reduces Manual Setup
+5. Internal Working
+
+Explanation:
+
+“`@EnableAutoConfiguration` enables Spring Boot’s automatic configuration mechanism.
+
+When Spring Boot starts, it checks which dependencies are available in the classpath and automatically configures required beans.
+
+For example:
+
+* If web dependency exists → Spring configures Tomcat and Spring MVC
+* If JPA dependency exists → Spring configures Hibernate and DataSource
+
+Internally, Spring Boot uses conditional annotations like:
+
+* `@ConditionalOnClass`
+* `@ConditionalOnMissingBean`
+
+These conditions decide whether specific configurations should be loaded or not.
+
+This annotation removes the need for large amounts of manual XML or Java configuration.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+What is Stateless?
+A stateless system does not store any information about the previous requests or interactions.
+Each request is independent, and the server treats it as a new interaction every time.
+🔸 Example: HTTP is Stateless
+When you send a request to a web server:
+GET /user/123
+The server doesn't remember anything about your last request. It only responds based on the current request.
+✅ Advantages of Stateless Systems:
+* ✅ Scalable (easy to distribute across servers)
+* ✅ Simple to implement and debug
+* ✅ No session memory on the server
+❌ Disadvantages:
+* ❌ Must send all necessary data with every request
+* ❌ No built-in session memory (you need tokens, headers, etc.)
+
+🔹 What is Stateful (State Management)?
+A stateful system remembers information across requests.
+State is stored somewhere (client, server, or external store like Redis or DB).
+🔸 Example: Logged-in Session
+* You log in → server creates a session
+* Next request → server remembers who you are (using session ID, cookie, or token)
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+🔹 State Management Types
+Type	Description	Example
+Client-side	State stored on the browser/client	LocalStorage, Cookies
+Server-side	Server keeps session info (e.g., user login)	HttpSession, Spring Session
+Token-based (stateless)	Client stores token; server validates it on each request	JWT, OAuth2
+External store	State saved in DB or cache (Redis, Memcached)	Shared sessions
+✅ Example: Stateless vs Stateful in Java
+🔸 Stateless Controller (Spring Boot)
+@RestController
+public class HelloController {
+    @GetMapping("/hello")
+    public String hello(@RequestParam String name) {
+        return "Hello, " + name; // Stateless – no memory of previous call
+    }
+}
+🔸 Stateful Controller (Session)
+@RestController
+@SessionAttributes("name")
+public class UserController {
+    @PostMapping("/login")
+    public String login(@RequestParam String name, Model model) {
+        model.addAttribute("name", name); // State is stored in session
+        return "Logged in";
+    }
+
+    @GetMapping("/dashboard")
+    public String dashboard(@ModelAttribute("name") String name) {
+        return "Welcome back, " + name;
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Spring interview questions
+
+How would you handle inter-service communication in a microservices architecture using Spring Boot?
+For simple, direct communication, I would use Rest Template, which allows services to send requests and receive responses like a two-way conversation.
+For more complex interactions, especially when dealing with multiple services, I would choose Feign Client. Feign Client simplifies declaring and making web service clients, making the code cleaner and the process more efficient.
+For asynchronous communication, where immediate responses aren't necessary, I would use message brokers like RabbitMQ or Kafka. These act like community boards, where services can post messages that other services can read and act upon later. This approach ensures a robust, flexible communication system between microservices.
+
+Can you explain the caching mechanisms available in Spring Boot?
+Caching is like having a memory box where you can store things we use frequently, so we don't have to go through the whole process of getting them each time. It makes our application faster and more efficient.
+There is a Spring Cache Abstraction in Spring Boot and it is like a smart memory layer for our application. It's designed to save time and resources by remembering the results of expensive operations, like fetching data from a database. When we ask for the same data again, Spring Cache gives it to us quickly from its memory, instead of doing the whole operation again.
+
+How would you implement caching in a Spring Boot application?
+To implement caching in a Spring Boot application, first add a caching dependency, like spring-boot-starter-cache.
+Then, enable caching in the application by adding @EnableCaching annotation to the main class.
+Define cacheable operations using @Cacheable on methods whose results we want to cache. Optionally, customize cache behavior with annotations like @CacheEvict and @CachePut.
+Choose a cache provider (like EhCache or Hazelcast) or use the default concurrent map-based cache provided by Spring.
+
+Your Spring Boot application is experiencing performance issues under high load. What are the steps you would take to identify and address the performance?
+First, I would identify the specific performance issues using monitoring tools like Spring Boot Actuator or Splunk.
+I would also analyze application logs and metrics to spot any patterns or errors, especially under high load.
+Then, I would start a performance tests to replicate the issue and use a profiler for code-level analysis.
+After getting findings, I might optimize the database, implement caching, or use scaling options. It's also crucial to continuously monitor the application to prevent future issues.
+
+What are Spring Boot Actuator endpoints?
+Spring Boot Actuator is like a toolbox for monitoring and managing our Spring Boot application. It gives us endpoints (think of them as special URLs) where we can check health, view configurations, gather metrics, and more. It's super useful for keeping an eye on how your app is doing.
+In a production environment (which is like the real world where your app is being used by people), these endpoints can reveal sensitive information about your application. Imagine leaving our diary open in a public place - we wouldn't want that, right? Similarly, we don't want just anyone peeking into the internals of your application.
+
+How can we secure the actuator endpoints?
+Limit Exposure: By default, not all actuator endpoints are exposed. We can control which ones are available over the web. It's like choosing what parts of your diary are okay to share.
+Use Spring Security: We can configure Spring Security to require authentication for accessing actuator endpoints.
+Use HTTPS instead of HTTP.
+Actuator Role: Create a specific role, like ACTUATOR_ADMIN, and assign it to users who should nave access This is like aiving a key to only trusted neonie nave access.
+
+What strategies would you use to optimize the performance of a Spring Boot application?
+Let's say my Spring Boot application is taking too long to respond to user requests. I could:
+*   Implement caching for frequently accessed data.
+*   Optimize database queries to reduce the load on the database.
+*   Use asynchronous methods for operations like sending emails.
+*   Load Balancer if traffic is high
+*   Optimize the time complexity of the code
+*   Use webFlux to handle a large number of concurrent connections.
+
+How can we handle multiple beans of the same type?
+To handle multiple beans of the same type in Spring, we can use @Qualifier annotation. This lets us specify which bean to inject when there are multiple candidates.
+For example, if there are two beans of type DataSource, we can give each a name and use @Qualifier("beanName") to tell Spring which one to use.
+Another way is to use@Primary on one of the beans, marking it as the default choice when injecting that type.
+
+What are some best practices for managing transactions in Spring Boot applications?"
+1. Use @Transactional
+What It Is: @Transactional is an annotation in Spring Boot that we put on methods or classes. It tells Spring Boot,
+"Hey, please handle this as a single transaction."
+How to Use It: Put @Transactional on service methods where we perform database operations. If anything goes wrong with this method, Spring Boot will automatically "roll back" the changes to avoid partial updates.
+2. Keep Transactions at the Service Layer
+Best Layer for Transactions: It's usually best to handle transactions in the service layer of our application. The service layer is where we put business logic.
+Why Here?: It's the sweet spot where we can access different parts of your application (like data access and business logic) while keeping things organized.
+
+How do you approach testing in Spring Boot applications
+Testing in Spring Boot applications is like making sure everything in our newly built rocket works perfectly before launching it into space. We want to be sure each part does its job correctly. In Spring Boot, we have some great tools for this, including @SpringBoot Test and @MockBean.
+*   Unit Testing: This is like checking each part of our rocket individually, like the engine, the fuel tank, etc. We test small pieces of code, usually methods, in isolation.
+*   Integration Testing: Now, We are checking how different parts of our rocket work together. In Spring Boot, this means testing how different components interact with each other and
+-  with The Spring context
+
+What are conditional annotations and explain the purpose of conditional annotations in Spring Boot?
+Conditional annotations in Spring Boot help us create beans or configurations only if certain conditions are met.
+It's like setting rules: "If this condition is true, then do this." A common example is @ConditionalOnClass, which creates a bean only if a specific class is present.
+This makes our application flexible and adaptable to different environments without changing the code, enhancing its modularity and efficiency.
+
+
+Discuss the use of @SpringBootTest and @MockBean annotations?
+@SpringBootTest
+What It Is: @SpringBoot Test is an annotation used for integration testing in Spring Boot. It says, "Start up the Spring context when this test runs."
+When to Use It: Use @SpringBoot Test when we need to test how different parts of your application work together. It's great for when we need the full behavior of your application.
+@MockBean
+What It Is: @MockBean is used to create a mock (a fake) version of a component or service. This is useful when we want to test a part of your application without actually involving its dependencies.
+When to Use It: Use @MockBean in tests where we need to isolate the component being tested. For example, if We are testing a service that depends on a repository, we can mock the repository to control how it behaves and
+
+What advantages does YAML offer over properties files in Spring Boot? Are there limitations when using YAML for configuration?
+YAML offers several advantages over properties files in Spring Boot. It supports hierarchical configurations, which are more readable and easier to manage, especially for complex structures.
+YAML also allows comments, aiding documentation. However, YAML has limitations too. It's more error-prone due to its sensitivity to spaces and indentation. Additionally, YAML is less familiar to some developers compared to the straightforward key-value format of properties files.
+While YAML is great for complex configurations and readability, these limitations are important to consider when choosing the format for Spring Boot configuration.
+
+Explain how Spring Boot profiles work.
+Spring Boot profiles are like having different settings for our app depending on the situation. It's like having different playlists on our music app - one for working out, one for relaxing, and so on. Each playlist sets a different mood, just like each profile in Spring Boot sets up a different environment for our app.
+Profiles in Spring Boot allow us to separate parts of our application configuration and make it available only in certain environments. For example, we might have one set of settings (a profile) for development, another for testing, and yet another for production.
+Why Use Profiles?
+Using profiles helps keep your application flexible and maintainable. We can easily switch environments without changing our code. It's like having different modes for different purposes, making sure our app always behaves appropriately for its current environment.
+
+What is aspect-oriented programming in the spring framework?
+Aspect-Oriented Programming (AOP) is a programming approach that helps in separating concerns in your program, especially those that cut across multiple parts of an application.
+Our main program code focuses on the core functionality while the "aspects" take care of other common tasks that need to happen in various places, like logging, security checks, or managing transactions.
+For example, in a Java application, we might have methods where we want to log information every time they're called or check that a user has the right permissions. Instead of putting this logging or security code into every method, we can define it once in an "aspect" and then specify where and when this code should be applied across our application. This keeps our main code cleaner and more focused on its primary tasks.
+
+What is Spring Cloud and how it is useful for building microservices?
+Spring Cloud is one of the components of the Spring framework, it helps manage microservices.
+Imagine we are running an online store application, like a virtual mall, where different sections handle different tasks. In this app, each store or section is a microservice. One section handles customer logins, another manages the shopping cart, one takes care of processing payments, and the other lists all the products.
+Building and managing such an app can be complex because we need all these sections to work together seamlessly. Customers should be able to log in, add items to their cart, pay for them, and browse products without any problems. That's where Spring Cloud comes into the picture. It helps microservices in connecting the section, balancing the crowd, keeping the secret safe, etc., etc.
+
+How does Spring Boot make the decision on which server to use?
+Spring Boot decides which server to use based on the classpath dependencies.
+If a specific server dependency, like Tomcat, Jetty, or Undertow, is present, Spring Boot auto-configures it as the default server.
+If no server dependency is found, Spring Boot defaults to Tomcat as it's included in spring-boot-starter-web. This automatic server selection simplifies setup and configuration, allowing us to focus more on developing the application rather than configuring server details.
+
+Describe a Spring Boot project where you significantly improved performance. What techniques did you use?
+I improved a Spring Boot project's performance by optimizing database interactions with connection pooling and caching by using EhCache.
+I also enabled HTTP response compression and configured stateless sessions in Spring Security to reduce data transfer and session overhead.
+I significantly reduced response times by using Spring Boot's actuator for real-time monitoring and adopting asynchronous processing for non-critical tasks. I increased the application's ability to handle more concurrent users, enhancing overall efficiency.
+
+Explain the concept of Spring Boot's embedded servlet containers.
+Spring Boot has an embedded servlet container feature, which essentially means it has a web server (like Tomcat, Jetty, or Undertow) built right into the application. This allows us to run our web applications directly without setting up an external server.
+It's a big time-saver for development and testing because we can just run our application from our development environment or through a simple command.
+This embedded approach simplifies deployment too, as our application becomes a standalone package with everything needed to run it, and it will eliminate the need for separate web server configuration.
+
+How does Spring Boot simplify the management of application secrets and sensitive configurations, especially when deployed in different environments?
+Spring Boot helps manage application secrets by allowing configurations to be externalized and kept separate from the code.
+This means I can use properties files, YAML files, environment variables, and command-line arguments to adjust settings for different environments like development, testing, and production. For sensitive data, Spring Boot can integrate with systems like Spring Cloud Config Server or HashiCorp Vault, which securely stores and provides access to secrets.
+This setup simplifies managing sensitive configurations without hardcoding them, enhancing security and flexibility across various deployment environments.
+
+Explain Spring Boot's approach to handling asynchronous operations.
+Spring Boot uses the @Async annotation to handle asynchronous operations. This lets us run tasks in the background without waiting for them to be complete before moving on to the next line of code.
+To make a method asynchronous, we just add @Async above its definition, and Spring takes care of running it in a separate thread. This is handy for operations that are independent and can be run in parallel, like sending emails or processing files, so the main flow of the application doesn't get blocked.
+To work with async operations, we also need to enable it in the configuration by adding @EnableAsync to one of the configuration classes.
+
+How can you enable and use asynchronous methods in a Spring Boot application?
+To enable and use asynchronous methods in a Spring Boot application:
+*   First, I would add the @EnableAsync annotation to one of my configuration classes. This enables Spring's asynchronous method execution capability.
+*   Next, I would mark methods I want to run asynchronously with the @Async annotation. These methods can return void or a Future type if I want to track the result.
+*   Finally, I would call these methods like any other method. Spring takes care of running them in separate threads, allowing the calling thread to proceed without waiting for the task to finish.
+Remember, for the @Async annotation to be effective, the method calls must be made from outside the class. If I call an asynchronous method from within the same class, it won't execute asynchronously due to the way Spring proxying works
+
+Can you explain the difference between authentication and authorization in Spring Security?
+In Spring Security, authentication is verifying who I am, like showing an ID. It checks my identity using methods like passwords or tokens.
+Authorization decides what I'm allowed to do after I'm identified, like if I can access certain parts of an app. It's about permissions.
+So, authentication is about confirming my identity, and authorization is about my access rights based on that identity
+
+What is Spring Boot CLI and how to execute the Spring Boot project using boot CLI?
+Spring Boot CLI (Command Line Interface) is a tool for running Spring Boot applications easily. It helps to avoid boilerplate code and configuration.
+To execute the spring boot project using boot CLI:
+*   First, install the CLI through a package manager or download it from the Spring website.
+*   Write the application code in a Groovy script, which allows using Spring Boot features without detailed configuration.
+*   In the terminal, navigate to the script's directory and run spring run myApp.groovy, substituting myApp.groovy with the script'
+
+How Is Spring Security Implemented In A Spring Boot Application?
+To add the spring security in a spring boot application, we first need to include spring security starter dependency in the POM file
+Then, we create a configuration class extending WebSecurityConfigurer Adapter to customize security settings, such as specifying secured endpoints and configuring the login and logout process. we also implement the UserDetailsService interface to load user information, usually from a database, and use a password encoder like BCryptPasswordEncoder for secure password storage.
+We can secure specific endpoints using annotations like @Pre Authorize, based on roles or permissions.
+This setup ensures that my Spring Boot application is secure, managing both authentication and authorization effectivelv
+
+How to Disable a Specific Auto-Configuration?
+To disable a specific auto-configuration in a Spring Boot application, I use the exclude attribute of the @SpringBootApplication annotation.
+First, I find out which auto-configuration class I want to disable. For example, let's say I want to disable the auto-configuration for DataSource.
+Then, I update @SpringBoot Application with exclude keword as shown below in the code.
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+public class MyApplication {
+public static void main(String[] args) (
+SpringApplication.run(MyApplication.class, args);
+
+If you had to scale a Spring Boot application to handle high traffic, what strategies would you use?
+To scale a Spring Boot application for high traffic, we can:
+Add more app instances (horizontal scaling) and use a load balancer to spread out the traffic.
+Break your app into microservices so each part can be scaled independently.
+Use cloud services that can automatically adjust resources based on your app's needs.
+Use caching to store frequently accessed data, reducing the need to fetch it from the database every time.
+Implement an API Gateway to handle requests and take care of things like authentication
+
+Describe how to implement security in a microservices architecture using Spring Boot and Spring Security.
+To secure microservices with Spring Boot and Spring Security, do the following:
+Add Spring Security to each microservice for authentication and authorization.
+Create a central authentication service that gives out tokens (like JWT) when users log in.
+Ensure each microservice checks these tokens to let only allowed users in.
+Use SSL/TLS for secure communication.
+Implement an API Gateway to manage security checks and route reauests
+
+Imagine you are designing a Spring Boot application that interfaces with multiple external APIs. How would you handle API rate limits and failures?
+To handle API rate limits and failures in a Spring Boot application, I would
+*   Use a circuit breaker to manage failures
+*   Implement rate limiting to avoid exceeding API limits
+*   Add a retry mechanism with exponential backoff for temporary issues
+*   Use caching to reduce the number of requests.
+This approach helps keep the application reliable and efficient.
+
+How you would manage externalized configuration and secure sensitive configuration properties in a microservices architecture?
+To handle these settings across microservices in a big project, I would use a tool called Spring Cloud Config.
+It's like having a central folder where all settings are kept.
+This folder can be on the web or my computer. There's a special app, called Config Server, that gives out these settings to all the other small apps when they ask for it.
+If there are any secret settings, like passwords, I would make sure they are scrambled up so no one can easily see them. This way, all microservices can easily get updated settings they need to work right, and the important stuff stays safe.
+
+How can Spring Boot applications be made more resilient to failures, especially in microservices architectures?
+To make Spring Boot apps stronger against failures, especially when using many services together, we can use tools and techniques like circuit breakers and retries with libraries like Resilience4j. A circuit breaker stops calls to a service that's not working right, helping prevent bigger problems. Retry logic tries the call again in case it fails for a minor reason.
+Also, setting up timeouts helps avoid waiting too long for something that might not work. Plus, keeping an eye on the system with good logging and monitoring lets spot and fix issues fast. This approach keeps the app running smoothly, even when some parts have trouble.
+
+How can Spring Cloud Gateway be configured for routing, security, and monitoring?
+For routing, we define routes in the application properties or through Java config, specifying paths and destinations for incoming requests.
+For security, we integrate Spring Security to add authentication, authorization, and protection against common threats.
+To enable monitoring, we use Spring Actuator, which provides built-in endpoints for monitoring and managing the gateway.
+This setup allows us to control how requests are handled, secure the gateway, and keep an eye on its performance and health, all within the Spring ecosystem.
+
+How would you manage and monitor asynchronous tasks in a Spring Boot application, ensuring that you can track task progress and handle failures?
+I'd integrate with a messaging system like RabbitMQ or Apache Kafka. First, I'd add the necessary dependencies in my pom.xml or build.gradle file. Then, I'd configure the connection to the message broker in my application properties or application.yml file, specifying details like the host, port, and credentials.
+Next, I'd use Spring's @EnableMessaging annotation to enable messaging capabilities and create a @Bean to define the queue, exchange, and binding. To send messages, I'd autowire the Kafka Template and use its send or convert AndSend method, passing the message and destination.
+
+Your application needs to process notifications asynchronously using a message queue. Explain how you would set up the integration and send messages from your Spring Boot application.
+To manage and monitor asynchronous tasks in a Spring Boot app, I'd use the @Async annotation to run tasks in the background and CompletableFuture to track their progress and handling results or failures. For thread management, I'd configure a ThreadPool TaskExecutor to customize thread settings.
+To monitor these tasks, I'd integrate Spring Boot Actuator, which provides insights into app health and metrics, including thread pool usage. This combination allows me to efficiently run tasks asynchronously, monitor their execution, and ensure proper error handling, keeping the app responsive and reliable.
+
+How to Deploy Spring Boot Web Applications as Jar and War
+Files?
+To deploy Spring Boot web applications, we can package them as either JAR or WAR files. For a JAR, we use Spring Boot's embedded server, like Tomcat, by running the command mvn package and then java - jar target/myapplication.jar.
+If we need a WAR file for deployment on an external server, we change the packaging in the pom.xml to ‹ packaging›war‹/packaging›, ensure the application extends SpringBootServlet Initializer, and then build with mvn package. The WAR file can then be deployed to any Java servlet container, like Tomcat or Jetty.
+
+What are the basic Annotations that Spring Boot offers?
+Spring Boot offers several basic annotations for the development. @SpringBoot Application is a key annotation that combines @Configuration, @EnableAutoConfiguration, and @ComponentScan, setting up the foundation for a Spring Boot application.
+@RestController and @RequestMapping are essential for creating RESTful web services, allowing us to define controller classes and map URL paths to methods.
+@Service and @Repository annotations mark service and data access layers, respectively, promoting separation of concerns. @Autowired enables dependency injection, automatically wiring beans. These annotations are crucial in reducing boilerplate code, speeding up development, and maintaining clear architecture, making Spring Boot applications easy to create and manage.
+
+Question: Explain Circuit Breaker
+
+Main points:
+
+1. Failure Handling
+2. Prevent Cascading Failures
+3. Improve System Stability
+4. Fallback Mechanism
+5. Three States
+6. Real-Time Usage
+
+Explanation:
+
+“Circuit Breaker is a design pattern mainly used in Microservices Architecture to handle failures gracefully and prevent one failing service from affecting the entire system.
+
+For example, suppose Service A is calling Service B.
+
+If Service B becomes slow or goes down, continuously calling it will waste resources and increase response time. This may eventually impact the entire application.
+
+To avoid this problem, we use Circuit Breaker.
+
+The Circuit Breaker monitors service calls. If failures cross a certain threshold, it temporarily stops calling the failing service and immediately returns a fallback response instead.
+
+This prevents cascading failures and improves system stability.
+
+Circuit Breaker mainly works in three states.
+
+First is Closed State.
+In this state, everything works normally and requests flow to the actual service.
+
+Second is Open State.
+If failures increase continuously, the circuit opens and stops sending requests to the failing service. Instead, fallback responses are returned immediately.
+
+Third is Half-Open State.
+After some timeout, Circuit Breaker allows a few test requests to check whether the service has recovered. If successful, the circuit closes again. Otherwise, it remains open.
+
+In Spring Boot, Circuit Breaker is commonly implemented using:
+
+* Resilience4j
+* Hystrix (older)
+
+Example real-time scenario:
+
+Suppose an Order Service calls Payment Service.
+
+If Payment Service goes down:
+
+* Without Circuit Breaker → Order Service keeps waiting and becomes slow
+* With Circuit Breaker → fallback response is returned quickly like:
+  ‘Payment service temporarily unavailable’
+
+This keeps the system responsive even during failures.
+
+So overall, Circuit Breaker helps improve fault tolerance, prevents cascading failures, and keeps microservices applications stable during service outages.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+11. explain some response status codes
+Client Error (4xx):
+* 400 Bad Request: The server cannot process the request due to a client-side error, such as a malformed request.  
+* 401 Unauthorized: The client needs to authenticate to access the resource.  
+* 403 Forbidden: The client is not authorized to access the resource.  
+* 404 Not Found: The server cannot find the requested resource.  
+* 405 Method Not Allowed: The HTTP method used in the request is not allowed for the requested resource.  
+* 410 Gone: The requested resource is no longer available on the server and will not be available in the future. 
+
+
+What are Microservices?
+• Microservices is an architecture where the application is exposed as loosely coupled services that can be independently developed, deployed, and maintained. Each service exposed is referred to as Microservice. Each service performs a unique function.
+• Speciality of this architecture is that polyglot architecture is supported. For example, if a team is working on one of the microservice using Java, Spring Boot, and MySQL, another team can work on another microservice using Python, Node IS, and NoSQL.
+• Different microservices can use different programming languages.
+Different microservices can use a different version of the same programming language.
+Different microservices can use different architectures as well.
+
+Why Microservices?
+In the case of monolith applications, there are several problems like
+• Same code base for presentation, business layer, and data access layer. Application is deployed as a single unit.
+• Complex to maintain and scalability is an issue.
+Microservice solves the above problems.
+Microservices are ideal when a monolith or a legacy application needs to be modernized.
+For new software development, if the key business drivers are to reduce time to market, scalable better software, lower costs, faster development, or cloud-native development, microservices are ideal.
+Each service is independent and gives the flexibility to choose the programming language, database, and/or architecture.
+Distinct services can be developed, deployed, and maintained independently.
+
+What are the pros and cons of Microservice Architecture?
+
+| **Pros**                                                    | **Cons**                                                                                                              |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Freedom to use different technologies                       | Management of a large number of services is difficult                                                                 |
+| Each microservice focuses on a single capability            | Communication between microservices is complex                                                                        |
+| Supports individual deployable units                        | Increased efforts for configuration and other operations                                                              |
+| Allows frequent software releases                           | Difficult to maintain transaction safety and data boundaries                                                          |
+| Ensures security of each service                            | Decentralized nature means more services → more resources → higher investment                                         |
+| Multiple services can be developed and deployed in parallel | Debugging is harder unless proper instrumentation is in place                                                         |
+| —                                                           | Requires a large team with the right mix of design, development, automation, deployment, tools, and testing expertise |
+
+How does Microservice Architecture work?
+
+[FE / Client]
+      |
+      v
+[Security & Identity Management]
+      |
+      v
+[API Gateway]
+   /     |     \
+  v      v      v
+[Microservice 1] [Microservice 2] [Microservice 3]
+   |         |         |
+   v         v         v
+[Service Discovery] <--> [Microservices register & discover each other]
+
+
+
+How do microservices communicate with each other?
+In the case of Microservice Architecture, there are 2 different types of inter-service communication between microservices.
+a. Synchronous communication
+b. Asynchronous communication
+Synchronous communication:
+In the case of Synchronous communication between microservices, the client service waits for the response within a time limit. The possible solution is using HTTP Protocol using via REST API for interservice communication.
+
+Asynchronous Communication:
+In the case of Asynchronous Communication, the client service doesn't wait for the response from another service. When the client microservice calls another microservice, the thread is not blocked till a response comes from the server. The message producer service generates a message and sends the message to a message broker on a defined topic. The message producer waits for only the acknowledgment from the message broker to know that message is received by the broker.
+The consuming service subscribes to a topic in the messaging queue. All the messages belonging to that topic will be fed to the consuming systems). The message producer service and consuming services don't even know each other. The response is received in the same methodology through a message broker via defined message topics.
+Different messaging tools are based on the AMQP (Advanced Message Queuing Protocol). Some examples are given below.
+a. Apache Kafka
+b. RabbitMQ point to point comm
+e Anache ActiveMO
+
+
+What is the difference between Monolithic, SOA and Microservices Architecture?
+• Monolithic Architecture is similar to a big container wherein all the software components of an application are assembled together and tightly packaged.
+• A Service-Oriented Architecture is a collection of services which communicate with each other.
+The communication can involve either simple data passing or it could involve two or more services coordinating some activity.
+• Microservice Architecture is an architectural style that structures an application as a collection of small autonomous services, modeled around a business domain.
+• Main diff b/w SOA and MS architecture is Based on sharing of data and info. SOA shares and reuses as much as possible while MS focuses on sharing as little as possible
+
+
+
+Ways to communicate between Microservices
+• We have seen Synchronous communications through -
+• Rest APIs
+• GraphQ!
+• Feign using Eureka discoveries
+• GRPC°(10 times faster than REST APIs ) - developed by Google as substitute of REST
+with many more features.
+• A synchronous call means that a service waits for the response after performing a request.
+• Today we will look at ways to do asynchronous communication in java. This communication usually involves some kind of messaging system like
+• Active Mqs
+• Rabbit MQs
+• Kafka
+
+What is PTP Async communication
+• PTP - A queue will be used for this type of messaging-based communication.
+• The service that produces the message, which is called as producer (sender), will send the message to a queue in one message broker and the service that has an interest in that message, which is called a consumer (receiver), will consume the message from that queue and carry out further processes for that message
+• One message sent by a producer can be consumed by only one receiver and the message will be deleted after consumed.
+• If the receiver or an interested service is down, the message will remain persistent in that queue until the receiver is up and consumes the message.
+• For this reason, messaging-based communication is one of the best choices to make our microservices resilient.
+• A popular choice for the queueing system is RabbitMQ, ActiveMQ
+
+What is Publisher-Subscriber Async communication
+• In publisher-subscriber messaging-based communication, the topic in the message broker will be used to store the message sent by the publisher and then subscribers that subscribe to that topic will consume that message
+• Unlike point to point pattern, the message will be ready to consume for all subscribers and the topic can have one or more subscribers. The message remains persistent in a topic until we delete it.
+• In messaging-based communication, the services that consume messages, either from queue or topic, must know the common message structure that is produced or published by producer or publisher.
+• examples are Kafka, Amazon SNS etc
+
+
+When to use which communication method
+• When we start creating the application from scratch go with a synchronous system to optimize for speed of evolution
+• And then once your microservices architecture grows and starts becoming complex and multifunctional then focus on switching to asynchronous consmunications. Identify all possible communications your microservice do to interact with order Microservices. Figure out if it strictly needs to be synchronous. If the response is really not necessary to proceed with other functionalities then convert that communication channel to Asynchronous communication channel (like with ActiveMQ, Rabbit Mq, kafka etc)
+
+Alright — let’s make this **crystal clear** so you’ll always know **when to use synchronous vs. asynchronous communication** in microservices (including Kafka).
+
+---
+
+---
+
+## **3. Easy Decision Table**
+
+| **Criteria**             | **Synchronous**           | **Asynchronous**     |
+| ------------------------ | ------------------------- | -------------------- |
+| Need immediate response? | ✅ Yes                     | ❌ No                 |
+| User waiting?            | ✅ Yes                     | ❌ No                 |
+| Task is long-running?    | ❌ No                      | ✅ Yes                |
+| Service coupling         | Tight                     | Loose                |
+| Common tech              | REST, gRPC                | Kafka, RabbitMQ, SQS |
+| Failure handling         | Retry or fail immediately | Store & replay later |
+
+---
+
+## **4. Hybrid Approach**
+
+Some systems use **both**:
+
+* Payment → Synchronous (must confirm)
+* Send Email Receipt → Asynchronous (can be delayed)
+
+---
+What is SAGA
+• A saga is that sequence of local transactions.
+• Each Saga has 2 Jobs to Do
+• Update the current Microservice and make required changes.
+Publish events to trigger the next transaction for the next microservices.
+
+Alright — let’s connect your **Order–Payment–Delivery** example to a **Kafka event-driven flow**, explain each success and failure path step-by-step, and show where events are published/consumed.
+
+
+Why SAGA ??
+• Now we moved to microservices architecture and Segregated the whole zomato or swiggy application to
+• Order service
+• Payment service
+• Delivery Service
+• Now your order service accepts your order, Payment service validates the payment done and Delivery service is responsible for delivery of your order to your home. When delivered successfully the orders is marked completed in the application. This is happy case.
+• Ever thought about the worst case Delivery is failed as no delivery partner was available. Your payment was done, Money got deducted and now No food. At Least we need to get the money back and Order must be marked as cancelled.
+• For this to happen we need a Transaction rollback. Transaction did get rolled back but only the scope of transaction was in Delivery service. The boundary for this transaction ended in Delivery service.
+• Now what about the order service and payment service?? Neither your money is returned with this rollback nor your order status changed from waiting to failed / Cancelled. Such a bad user experience right ?
+• This is the classic example where your application completely failed to manage distributed transaction
+(A transaction what spans across multiple Microservices). Now This is a problem and To handle such distributed transactions issues SAGA Design pattern came into picture.
+
+
+
+---
+
+
+How SAGA DP handles failure of any individual SAGA?
+• The saga pattern provides transaction management with using a sequence of local transactions of microservices. Every microservices has its own database and it can able to manage local transaction in atomic way with strict consistency.
+• So saga pattern grouping these local transactions and sequentially invoking one by one. Each local transaction updates the database and publishes an event to trigger the next local transaction.
+• If one of the step is failed, than saga patterns trigger to rollback transactions that are a set of compensating transactions that rollback the changes on previous microservices and restore data consistency.
+
+
+Ways to Implement SAGA?
+• There are two type of saga implementation ways
+• choreography
+• orchestration
+
+
+What is Choreography Saga Pattern?
+• Choreography is a way to coordinate sagas where participants exchange events without a centralized point of control
+• With choreography, each microservices run its own local transaction and publishes events to message broker system and that trigger local transactions in other microservices.
+
+Got it — the diagram you’ve shared represents the **Choreography Saga Pattern** in a microservices architecture using a **message broker**.
+
+---
+
+## **Key Points**
+
+* This pattern is **event-driven** and uses **loose coupling** between services.
+* **Message Broker** (e.g., Kafka, RabbitMQ) is central for communication.
+* There’s **no central orchestrator** — services react to events and trigger the next steps.
+* Ideal for distributed transactions where each service is autonomous.
+
+---
+
+## **Flowchart (Text-based Representation)**
+
+```
+Client
+  |
+  v
+[Message Broker]
+  |
+  v
+Order Service ----> Publish "Order Created Event" ----> Message Broker
+                                                           |
+                                                           v
+                                                 Payment Service ----> Publish "Payment Completed Event" ----> Message Broker
+                                                                                                                 |
+                                                                                                                 v
+                                                                                                      Delivery Service ----> (Delivery Done)
+                                                                                                                 |
+                                                                                                          (or "Delivery Failed Event")
+```
+
+---
+
+
+Disadvantages of Choreography Saga Pattern?
+• Workflow can become confusing when adding new steps, as it's difficult to track which saga participants listen to which commands.
+• There's a risk of cyclic dependency between saga participants because they have to consume each
+other's commands
+• Integration testing is difficult because all services must be running to simulate a transaction.
+
+
+What is Orchestration Saga Pattern?
+• Orchestration is a way to coordinate sagas where a centralized controller tells the saga participants what local transactions to execute.
+• The saga orchestrator handles all the transactions and tells the participants which operation to perform based on events.
+• The orchestrator
+• executes saga requests,
+• stores and interprets the states of each task,
+• handles failure recovery with compensating transactions.
+
+
+Perfect! Let’s go **step by step** and cover all your Spring and Spring Boot questions in a **structured, senior Java developer style**. I’ll break it into sections so it’s easier to read and revise.
+
+---
+
+## **1. Difference Between Spring and Spring Boot**
+
+| Feature        | Spring                                                                                              | Spring Boot                                                                            |
+| -------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Purpose        | Provides a framework for building Java applications with dependency injection, AOP, and MVC support | Simplifies Spring application setup by auto-configuring components and embedded server |
+| Configuration  | Requires manual XML/Java config                                                                     | Provides auto-configuration, starter dependencies, and embedded servers                |
+| Complexity     | Higher, need to configure everything                                                                | Lower, minimal setup required                                                          |
+| Deployment     | Usually packaged as WAR for external servers                                                        | Can be run standalone with embedded server (like Tomcat)                               |
+| Learning Curve | Steeper                                                                                             | Easier for beginners to start                                                          |
+
+**In short:** Spring is the foundation framework; Spring Boot is a productivity tool built on top of Spring for rapid development.
+
+---
+
+## **2. Dependency Injection (DI)**
+
+* DI is a **design pattern** in which the Spring container **injects dependencies** into objects rather than the object creating them itself.
+* Example:
+
+```java
+@Service
+public class EmployeeService {
+    private final EmployeeRepository repo;
+
+    @Autowired
+    public EmployeeService(EmployeeRepository repo) {
+        this.repo = repo;
+    }
+}
+```
+
+Here, Spring injects `EmployeeRepository` automatically.
+
+---
+
+## **3. Inversion of Control (IoC)**
+
+* IoC is the principle where **the control of object creation and lifecycle is shifted from the program to the container/framework**.
+* DI is **a form of IoC**.
+
+**IoC vs DI**
+
+* **IoC:** General concept of delegating control to container
+* **DI:** Concrete implementation of IoC using dependency injection
+
+---
+
+## **4. What happens when Spring Boot application starts**
+
+1. **SpringApplication.run()** initializes Spring context
+2. **Embedded server starts** (Tomcat/Jetty/Undertow)
+3. **Beans are created** and dependencies injected
+4. **ApplicationContext is loaded**
+5. **Auto-configuration occurs** based on classpath and properties
+6. **Application is ready to serve requests**
+
+---
+
+## **5. Bean, Lifecycle, Types**
+
+* **Bean:** Object managed by Spring container
+
+* **Lifecycle:**
+
+  1. Instantiation
+  2. Dependency Injection
+  3. `@PostConstruct` initialization
+  4. Ready to use
+  5. `@PreDestroy` destruction
+
+* **Bean scopes:**
+
+  | Scope         | Description                                  |
+  | ------------- | -------------------------------------------- |
+  | Singleton     | Single instance per Spring context (default) |
+  | Prototype     | New instance every request                   |
+  | Request       | One bean per HTTP request                    |
+  | Session       | One bean per HTTP session                    |
+  | GlobalSession | One bean per global HTTP session (portlet)   |
+
+---
+
+## **6. Changing Spring Boot Port**
+
+* **Default port:** 8080
+* **Change in `application.properties` or `application.yml`:**
+
+```properties
+server.port=9090
+```
+
+---
+
+## **7. Paging and Sorting in Spring Boot**
+
+* Use `PagingAndSortingRepository` or `JpaRepository` methods:
+
+```java
+Page<Employee> employees = employeeRepository.findAll(PageRequest.of(0, 10, Sort.by("name")));
+```
+
+* **Internal server:** Tomcat (default)
+* Can switch to Jetty/Undertow in dependencies
+
+---
+
+## **8. @SpringBootApplication**
+
+* Combination of:
+
+  * `@Configuration`
+  * `@EnableAutoConfiguration`
+  * `@ComponentScan`
+* Entry point annotation
+
+---
+
+## **10. @Configuration**
+
+* Marks a class as **source of bean definitions**
+* Replaces XML-based configuration
+
+---
+
+## **11. Autowiring**
+
+* Automatically inject dependencies
+* Types:
+
+  * `@Autowired` by type
+  * `@Qualifier` to select a specific bean
+  * `@Primary` to prefer one bean over others
+
+---
+
+## **12. ApplicationContext vs Bean**
+
+* **ApplicationContext:** Spring container that holds all beans
+* **@Bean vs @Component**
+
+  * `@Bean`: Method-level, in `@Configuration` class
+  * `@Component`: Class-level, auto-scanned
+
+---
+
+## **13. @Qualifier**
+
+* Used to **resolve ambiguity** when multiple beans of same type exist
+
+---
+
+## **14. Filter vs ControllerAdvice**
+
+| Feature | Filter                            | ControllerAdvice                     |
+| ------- | --------------------------------- | ------------------------------------ |
+| Layer   | Servlet filter (request/response) | Spring MVC exception/global handling |
+| Scope   | Every request                     | Controller exceptions, responses     |
+---
+
+## **16. @Transactional**
+
+* Manages **database transactions** automatically
+* Rollback on exceptions
+* Example:
+
+```java
+@Transactional
+public void saveEmployee(Employee emp) {
+    repository.save(emp);
+}
+```
+
+---
+
+## **18. Profiles in Spring Boot**
+
+* Define **environment-specific configurations** using `application-{profile}.properties`
+
+```properties
+spring.profiles.active=dev
+```
+
+---
+
+## **19. CrudRepository vs JpaRepository**
+
+| Feature              | CrudRepository | JpaRepository |
+| -------------------- | -------------- | ------------- |
+| Basic CRUD           | ✔              | ✔             |
+| Pagination & Sorting | ✖              | ✔             |
+| JPA Methods          | ✖              | ✔             |
+
+---      ////////////////////////////////////////////////////////////// Microservices ////////////////////////////////////////////////////////////////////
+
+Absolutely! Here's a detailed, professional, and structured way to answer these questions as a Senior Java Developer with 6+ years of experience in Core Java, Spring Boot, and Microservices. I’ve kept explanations clear, concise, and supported with real-world examples, as you requested.
+
+---
+
+### **1. How do you design Microservices and explain the process?**
+
+**Microservices Design Process:**
+
+* **Understand Business Domain:** Break down the system into smaller domains using **Domain-Driven Design (DDD)**.
+
+  * Example: In a banking system: `Customer Service`, `Account Service`, `Transaction Service`.
+* **Define Service Boundaries:** Identify independent functionalities that can operate autonomously.
+* **Database Design:** Each service has **its own database** (polyglot persistence) to avoid tight coupling.
+* **Communication Strategy:**
+
+  * **Synchronous:** REST/HTTP for request-response.
+  * **Asynchronous:** Kafka/RabbitMQ for event-driven patterns.
+* **API Design:** Design clean, versioned, and well-documented APIs.
+* **Infrastructure Considerations:**
+
+  * Containerization (Docker), Orchestration (Kubernetes).
+  * Logging, monitoring, and distributed tracing.
+* **Security & Resilience:** Implement OAuth2/JWT, circuit breakers (Hystrix/Resilience4j).
+
+**Example:** For an enterprise banking app, `Transaction Service` handles fund transfers independently from `Account Service`, enabling separate deployments without downtime.
+
+---
+
+### **2. Explain your project architecture (Monolithic vs Microservices)**
+
+| Feature            | Monolithic                       | Microservices                                   |
+| ------------------ | -------------------------------- | ----------------------------------------------- |
+| Codebase           | Single, large codebase           | Multiple small services                         |
+| Deployment         | Single deployment                | Independent deployment per service              |
+| Scalability        | Vertical scaling (CPU/RAM)       | Horizontal scaling per service                  |
+| Fault Isolation    | Low                              | High — one service failure doesn’t crash system |
+| Development Speed  | Slower for large teams           | Faster — teams work independently               |
+| Example in Banking | Core banking platform in one app | Separate services: `Loan`, `Account`, `Payment` |
+
+**Example:**
+
+* **Monolithic:** Traditional bank app with all modules in one WAR/JAR.
+* **Microservices:** Modern banking platform with separate services for payments, accounts, and transactions, deployed independently in Kubernetes.
+
+---
+
+### **3. What is API Gateway, and what role does it play in Microservices?**
+
+* Acts as a **single entry point** for all client requests to microservices.
+* Responsibilities:
+
+  * Request routing to appropriate service.
+  * Authentication and authorization (OAuth2/JWT).
+  * Rate limiting and throttling.
+  * Response aggregation (combining data from multiple services).
+  * Caching and load balancing.
+* **Example:** In a banking app, API Gateway handles login requests, routes to `Auth Service`, and ensures security before forwarding requests to `Account` or `Transaction` services.
+
+---
+
+### **4. Explain Kafka and why it is preferred in Microservices**
+
+* **Apache Kafka:** Distributed streaming platform for high-throughput, low-latency messaging.
+* **Why preferred:**
+
+  * Decouples services via **asynchronous messaging**.
+  * Handles **millions of events per second** reliably.
+  * Supports **event sourcing** and **CQRS** patterns.
+  * Fault-tolerant and horizontally scalable.
+* **Example:** Transaction events (transfer, deposit, withdrawal) are pushed to Kafka topics; multiple services consume asynchronously to update balances, notifications, and analytics.
+
+---
+
+### **5. Explain Kafka Architecture**
+
+* **Producer:** Publishes messages/events to Kafka topics.
+* **Consumer:** Reads messages from topics.
+* **Broker:** Kafka server that stores and serves messages.
+* **Topic:** Category or feed name where messages are published.
+* **Partition:** Topic divided into partitions for parallelism and scalability.
+* **Example:**
+
+  * Topic: `TransactionEvents`
+  * Partitions: 3 (for parallel processing)
+  * Consumers: `NotificationService`, `AnalyticsService`
+
+**Diagrammatically:**
+`Producer -> Topic (Partitioned) -> Broker -> Consumer`
+
+---
+
+### **6. Explain system architecture and distributed systems concepts**
+
+* **System Architecture:** Defines components, services, and their interactions.
+* **Distributed System Concepts:**
+
+  * **Scalability:** Adding nodes to handle load.
+  * **Consistency vs Availability:** CAP theorem.
+  * **Fault Tolerance:** Service replication and retries.
+  * **Load Balancing:** Evenly distributes requests.
+  * **Service Discovery:** Auto-detect available services.
+* **Example:** Banking microservices deployed on Kubernetes; Eureka/Consul for service discovery; Nginx for load balancing.
+
+---
+
+### **7. Explain error handling / exception logging in your project**
+
+* **Global Exception Handling:** Using `@ControllerAdvice` and `@ExceptionHandler`.
+* **Custom Exceptions:** Defined for business errors like `InsufficientFundsException`.
+* **Logging Frameworks:** Logback/SLF4J + correlation IDs for traceability.
+* **Error Monitoring:** Integrated with ELK stack or Grafana + Prometheus.
+* **Example:** If a transaction fails due to insufficient balance, the error is logged with transaction ID and sent to monitoring dashboard.
+
+---
+Question: What performance issues did you face, and how did you optimize them?
+
+Main points:
+
+1. Slow Database Queries
+2. High API Response Time
+3. Repeated Database Calls
+4. Memory Issues
+5. Thread Blocking
+6. Large Data Processing
+7. Monitoring and Analysis
+8. Optimization Techniques
+
+Explanation:
+
+“In one of my projects, we faced performance issues mainly related to slow API response times and high database load during peak traffic.
+
+First, we identified Slow Database Queries as one of the major bottlenecks. Some queries were taking several seconds because proper indexes were missing and unnecessary joins were used. We optimized the SQL queries, added indexing, and reduced unnecessary database calls. This improved response time significantly.
+
+Second, we noticed High API Response Time because some APIs were performing multiple operations synchronously, such as sending notifications and audit logging. To optimize this, we moved those operations to asynchronous processing using Kafka and Spring Boot’s `@Async` feature. This reduced API response time considerably.
+
+Third, we faced issues with Repeated Database Calls for frequently accessed data. For example, product details and configuration data were being fetched repeatedly from the database. We introduced Redis caching so frequently used data could be served directly from cache instead of hitting the database every time.
+
+Fourth, during high traffic, we observed Thread Blocking issues because some external service calls were taking too much time. We optimized timeout configurations and improved connection pooling to avoid unnecessary waiting threads.
+
+Fifth, while processing Large Data Sets, memory usage increased heavily because the application was loading too much data into memory at once. We optimized this using pagination and batch processing instead of loading complete datasets.
+
+Sixth, we continuously monitored the application using tools like:
+
+* Spring Boot Actuator
+* Grafana
+* Prometheus
+* ELK Stack
+
+These tools helped us identify slow APIs, memory usage, thread issues, and CPU bottlenecks.
+
+Finally, after applying caching, async processing, query optimization, and monitoring improvements, the application performance improved significantly and was able to handle much higher traffic with better stability and lower response times.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question: Explain System Design — Security, Scalability, and Performance
+
+Main points:
+
+1. Security
+2. Scalability
+3. Performance
+4. Database Design
+5. Caching
+6. Load Balancing
+7. Monitoring
+8. Fault Tolerance
+
+Explanation:
+
+“While designing a system, I mainly focus on three important areas:
+
+* Security
+* Scalability
+* Performance
+
+First, for Security, I ensure the application is protected from unauthorized access and common attacks. I usually implement:
+
+* Authentication and Authorization using Spring Security and JWT
+* Role-based access control
+* Password encryption
+* HTTPS communication
+* Input validation
+
+I also secure APIs using token-based authentication and restrict sensitive endpoints properly.
+
+Second, for Scalability, I design the application so it can handle increasing traffic without affecting stability.
+
+For scalability, I use:
+
+* Load Balancers
+* Multiple application instances
+* Microservices architecture
+* Auto Scaling using Kubernetes
+
+Instead of depending on a single server, traffic is distributed across multiple instances. This helps the system handle high traffic efficiently.
+
+Third, for Performance, I focus on reducing response time and improving system efficiency.
+
+Some common optimizations are:
+
+* Redis caching
+* Database indexing
+* Query optimization
+* Async processing using Kafka or RabbitMQ
+* Connection pooling
+
+Heavy operations like notifications or report generation should not block APIs, so they are processed asynchronously.
+
+Fourth, Database Design is also very important. I design proper relationships, indexing strategies, and normalization based on business requirements. For high traffic systems, I may use:
+
+* Read replicas
+* Partitioning
+* Sharding
+
+Fifth, I use Caching to reduce unnecessary database calls. Frequently accessed data should come from cache because cache access is much faster than database access.
+
+Sixth, Load Balancing helps distribute incoming traffic evenly across multiple servers. This prevents server overload and improves high availability.
+
+Seventh, Monitoring is essential in production systems. I use:
+
+* Spring Boot Actuator
+* Grafana
+* Prometheus
+* ELK Stack
+
+This helps monitor API performance, memory usage, CPU usage, and failures in real time.
+
+Finally, for Fault Tolerance, I implement:
+
+* Circuit Breakers
+* Retry mechanisms
+* Fallback responses
+
+This helps the system remain stable even when some services fail.
+
+So overall, good system design focuses on building a secure, scalable, high-performing, and fault-tolerant application that can handle real-world production traffic efficiently.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+✅ Difference Between Spring and Spring Boot
+Spring Framework
+* A comprehensive framework for building enterprise-level Java applications.
+* Requires manual configuration:
+    * Configure external servers (Tomcat, Jetty)
+    * Add dependencies manually
+    * Handle version conflicts
+* Does not provide an embedded server.
+* More setup time and boilerplate code.
+Spring Boot
+* A project built on top of Spring to simplify development.
+* Provides:
+    * Auto-configuration
+    * Starter dependencies
+    * Embedded servers (Tomcat, Jetty, Netty)
+* Eliminates most manual configuration.
+* Reduces development time; developers focus on business logic, not setup.
+
+✅ What is Dependency Injection (DI)?
+Dependency Injection is a design pattern where an object receives its dependencies from an external source instead of creating them itself.
+Benefits
+* Loose coupling
+* Easy testing
+* Better maintainability
+Types of DI
+* Constructor Injection (recommended)
+* Field Injection
+* Setter Injection
+
+✅ What is Inversion of Control (IoC)?
+IoC is a principle where the control of object creation is handed over to the framework, not the application code.
+Relation to DI
+* IoC is the principle
+* Dependency Injection is the technique that implements IoC
+
+✅ What Happens When a Spring Boot Application Starts?
+* The main method calls SpringApplication.run().
+* Spring Boot:
+    * Performs auto-configuration
+    * Scans for components
+    * Creates and initializes the Spring ApplicationContext
+    * Instantiates all beans
+    * Starts the embedded server (Tomcat/Jetty/Netty)
+    * Application becomes ready to accept requests
+
+✅ What is a Bean? Explain Bean Lifecycle
+A Bean is an object created and managed by the Spring IoC Container.
+Bean Lifecycle
+1. Bean definition loaded (using annotations or XML)
+2. Bean instantiation (via constructor)
+3. Dependency Injection
+4. BeanPostProcessor hooks (before & after initialization)
+5. Bean ready for use
+6. Destruction when context shuts down
+Types of Bean Scopes
+* Singleton (default, one instance)
+* Prototype (new instance every time)
+* Request (per HTTP request)
+* Session (per session)
+* Global Session (portlet applications)
+
+✅ How to Change Port in Spring Boot?
+In application.properties:
+server.port=8081
+
+✅ Which Server Does Spring Boot Use? How To Change It?
+* Default server → Tomcat
+* Supported: Jetty, Netty, Undertow
+To change server:
+* Exclude Tomcat from the Web starter
+* Add the desired server dependency (e.g., Jetty)
+* Spring Boot will automatically use it
+
+✅ How to Implement Paging and Sorting in Spring Boot?
+* Use JpaRepository or PagingAndSortingRepository
+* Create a Pageable object:
+Pageable pageable = PageRequest.of(page, size, Sort.by("name"));
+* Pass it to repository:
+userRepository.findAll(pageable);
+
+✅ What is @SpringBootApplication?
+A meta-annotation combining:
+* @Configuration
+* @ComponentScan
+* @EnableAutoConfiguration
+This makes the class the entry point of a Spring Boot application.
+
+✅ Important Spring Annotations
+@Service
+Marks service-layer classes.
+@Controller
+Used for MVC controllers that return views.
+@RestController
+Combination of @Controller + @ResponseBody. Used for returning JSON responses.
+@Entity
+Represents a table in the DB.
+@Component
+Marks a general Spring bean.
+@Repository
+DAO layer; provides exception translation.
+@Autowired
+Injects a dependency into a class.
+@Required
+Marks dependency as mandatory.
+@Primary
+Used when multiple beans of same type exist.
+@Async
+Executes a method asynchronously (non-blocking).
+@Transient
+Prevents a field from being persisted in DB.
+@ComponentScan
+Used to specify packages to scan for components.
+
+✅ Difference Between @Controller and @RestController
+* @Controller: Returns views (JSP/HTML).
+* @RestController: Returns REST responses (JSON/XML), no need for @ResponseBody.
+
+✅ What is @Configuration?
+Marks a class as a configuration class where beans are defined using @Bean.
+
+✅ What is Autowiring? Types of Autowiring
+Process where Spring automatically injects dependencies.
+Types:
+* Constructor Injection
+* Setter Injection
+* Field Injection
+
+Question: What is ApplicationContext?
+
+Main points:
+
+1. Spring IOC Container
+2. Bean Management
+3. Dependency Injection
+4. Bean Lifecycle Management
+5. Configuration Loading
+6. Event Handling
+7. Internal Working
+8. Real-Time Usage
+
+Explanation:
+
+“ApplicationContext is the central container in Spring Framework that manages the entire application.
+
+It is mainly responsible for:
+
+* Creating beans
+* Managing beans
+* Injecting dependencies
+* Handling bean lifecycle
+
+In simple terms, ApplicationContext acts as the brain of the Spring application.
+
+When the application starts, Spring creates the ApplicationContext object. It scans configuration classes and components such as:
+
+* `@Component`
+* `@Service`
+* `@Repository`
+* `@Controller`
+
+Then it creates those objects as Spring Beans and stores them inside the IOC Container.
+
+For example, if one service depends on another service, ApplicationContext automatically injects the dependency using Dependency Injection.
+
+It also manages the complete Bean Lifecycle including:
+
+* Bean creation
+* Initialization
+* Destruction
+
+Another important responsibility is Configuration Loading. ApplicationContext loads:
+
+* application.properties
+* Bean configurations
+* Profiles
+* Environment properties
+
+It also supports Event Handling inside Spring applications. Components can publish and listen to application events using the ApplicationContext.
+
+Internally, ApplicationContext extends BeanFactory and provides advanced enterprise features such as:
+
+* AOP support
+* Internationalization
+* Event propagation
+* Resource management
+
+In real-time projects, ApplicationContext manages all application components centrally, which helps reduce tight coupling and improves maintainability.
+
+So overall, ApplicationContext is the core Spring container responsible for creating, configuring, managing, and connecting all Spring Beans inside the application.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+✅ Spring Boot Starter Dependencies
+Spring Boot provides starter POMs that bundle required dependencies.
+Example:
+* spring-boot-starter-web
+* spring-boot-starter-data-jpa
+* spring-boot-starter-security
+* spring-boot-starter-test
+These reduce manual dependency configuration.
+
+✅ How to Disable a Configuration Class
+Ways:
+* Use @EnableAutoConfiguration(exclude = ...)
+* Use @ConditionalOnProperty to load config only if a property is set
+
+✅ Difference Between @RequestParam and @PathVariable
+@RequestParam
+Used to extract query parameters:
+/users?id=10
+@PathVariable
+Used to extract values from the URL path:
+/users/10
+
+✅ Global Error Handling — @ControllerAdvice + @ExceptionHandler
+* @ControllerAdvice: Defines global exception handlers.
+* @ExceptionHandler: Specifies which exception to handle.
+Example:
+@ExceptionHandler(Exception.class)
+public ResponseEntity<?> handleException(Exception ex) {
+    return ResponseEntity.badRequest().body(ex.getMessage());
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 1. Difference Between `@Bean` and `@Component`
+
+Main points:
+
+1. Bean Creation Style
+2. Automatic vs Manual Configuration
+3. Usage Purpose
+4. IOC Container Registration
+5. Real-Time Usage
+
+Explanation:
+
+“Both `@Bean` and `@Component` are used to create Spring-managed beans, but the way they work is different.
+
+First, `@Component` is used for Automatic Bean Creation. When Spring scans the package, it automatically detects classes annotated with:
+
+* `@Component`
+* `@Service`
+* `@Repository`
+* `@Controller`
+
+and creates beans automatically.
+
+Example:
+
+```java id="q4m8pk"
+@Component
+public class EmailService {
+}
+```
+
+Second, `@Bean` is used for Manual Bean Configuration. It is usually written inside a `@Configuration` class.
+
+Example:
+
+```java id="k7r2zn"
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public EmailService emailService() {
+        return new EmailService();
+    }
+}
+```
+
+Third, we usually use `@Bean` when configuring:
+
+* Third-party libraries
+* External classes
+* Custom object creation logic
+
+Because we may not have permission to modify those classes directly.
+
+Finally:
+
+* `@Component` → automatic scanning
+* `@Bean` → manual bean creation and configuration”
+
+---
+
+# 2. Filters and `@ControllerAdvice`
+
+Main points:
+
+1. Request Processing
+2. Global Exception Handling
+3. Pre/Post Processing
+4. Cross-Cutting Concerns
+5. Real-Time Usage
+
+Explanation:
+
+“Filters are mainly used to intercept HTTP requests and responses before they reach the controller.
+
+Common use cases:
+
+* Logging
+* Authentication
+* Request validation
+* Token checking
+
+Example:
+
+* Checking JWT token before processing API requests
+
+Filters work at the Servlet level and execute before the request enters Spring Controller.
+
+On the other hand, `@ControllerAdvice` is mainly used for Global Exception Handling in Spring Boot applications.
+
+Instead of writing try-catch blocks in every controller, we can handle exceptions centrally.
+
+Example:
+
+```java id="m5q8nd"
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+}
+```
+
+This improves code cleanliness and consistency.
+
+So:
+
+* Filters → request/response interception
+* `@ControllerAdvice` → centralized exception handling”
+
+---
+
+# 3. What is Idempotency?
+
+Main points:
+
+1. Same Request Multiple Times
+2. Same Result
+3. Prevent Duplicate Processing
+4. REST API Design
+5. Real-Time Usage
+
+Explanation:
+
+“Idempotency means performing the same operation multiple times should produce the same result without creating duplicate effects.
+
+For example:
+
+* Updating user profile multiple times with same data
+* Result remains the same
+
+HTTP methods like:
+
+* GET
+* PUT
+* DELETE
+
+are generally idempotent.
+
+But POST is usually non-idempotent because repeated requests may create duplicate records.
+
+In real-world systems like payment applications, idempotency is very important.
+
+Suppose payment API is called twice due to network retry:
+
+* Without idempotency → payment may happen twice
+* With idempotency → duplicate transaction is prevented
+
+Usually this is handled using:
+
+* Unique request IDs
+* Idempotency keys
+* Database checks
+
+This ensures operations are processed safely even during retries.”
+
+---
+
+# 4. CrudRepository vs JpaRepository
+
+Main points:
+
+1. Basic CRUD Support
+2. Advanced JPA Features
+3. Pagination and Sorting
+4. Batch Operations
+5. Real-Time Usage
+
+Explanation:
+
+“`CrudRepository` provides basic CRUD operations such as:
+
+* save
+* findById
+* delete
+* findAll
+
+It is suitable for simple applications with basic database operations.
+
+`JpaRepository` extends `CrudRepository` and provides additional features like:
+
+* Pagination
+* Sorting
+* Batch processing
+* Flush operations
+
+Example:
+
+```java id="x8m3pk"
+public interface UserRepository 
+       extends JpaRepository<User, Long> {
+}
+```
+
+In enterprise applications, `JpaRepository` is more commonly used because it provides advanced JPA capabilities and better support for large datasets.
+
+So:
+
+* `CrudRepository` → basic operations
+* `JpaRepository` → advanced JPA features with pagination and batch processing”
+
+---
+
+# 5. How to Connect Multiple Databases in Spring Boot
+
+Main points:
+
+1. Multiple DataSources
+2. Separate Configurations
+3. Separate Entity Managers
+4. Transaction Management
+5. Real-Time Usage
+
+Explanation:
+
+“To connect multiple databases in Spring Boot, we configure multiple DataSources separately.
+
+For each database, we define:
+
+* DataSource
+* EntityManagerFactory
+* TransactionManager
+
+Example:
+
+* One database for Customer data
+* Another database for Audit logs
+
+Each database will have separate configuration properties.
+
+Example:
+
+```properties id="v2n7qa"
+spring.datasource.db1.url=
+spring.datasource.db2.url=
+```
+
+Then we create separate configuration classes for each database.
+
+Spring Boot internally creates separate connections and manages them independently.
+
+This approach is commonly used in enterprise systems where:
+
+* Multiple applications share databases
+* Reporting database is separate
+* Audit database is separate
+* Legacy systems are integrated
+
+Proper transaction management is also important while working with multiple databases.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question: Spring Boot Performance Optimization
+
+Main points:
+
+1. Caching
+2. Database Optimization
+3. Async Processing
+4. Connection Pooling
+5. Load Balancing
+6. Pagination and Batch Processing
+7. JVM and Memory Tuning
+8. Monitoring and Profiling
+9. Reactive Programming
+10. Auto Scaling
+
+Explanation:
+
+“While optimizing Spring Boot application performance, I mainly focus on reducing response time, improving throughput, and minimizing unnecessary resource usage.
+
+First, I would use Caching with tools like Redis or Caffeine Cache. Frequently accessed data should not hit the database every time. By serving data directly from cache, response time improves significantly and database load decreases.
+
+Second, Database Optimization is very important because databases usually become the bottleneck in high-traffic systems. I optimize:
+
+* SQL queries
+* Indexing
+* Joins
+* Pagination
+* Connection usage
+
+I also avoid unnecessary database calls and use lazy loading carefully.
+
+Third, for time-consuming operations like sending emails, notifications, audit logging, report generation, or payment processing, I would use Async Processing with Kafka, RabbitMQ, or Spring Boot’s `@Async` feature. Heavy operations should not block the main request thread. APIs should respond quickly while background tasks are processed separately.
+
+Fourth, I would use Connection Pooling using HikariCP, which is the default in Spring Boot. Creating database connections repeatedly is expensive, so connection pooling improves performance by reusing existing connections efficiently.
+
+Fifth, for handling high traffic, I would use Load Balancing with multiple application instances. Instead of depending on a single server, incoming traffic is distributed across multiple instances to improve scalability and availability.
+
+Sixth, while handling large datasets, I would use Pagination and Batch Processing instead of loading huge amounts of data into memory at once. This reduces memory consumption and improves application stability.
+
+Seventh, JVM and Memory Tuning also plays an important role. I would monitor:
+
+* Heap memory
+* Garbage collection
+* Thread usage
+* CPU utilization
+
+Proper JVM tuning improves application performance under heavy load.
+
+Eighth, I would continuously monitor the application using tools like:
+
+* Spring Boot Actuator
+* Prometheus
+* Grafana
+* ELK Stack
+
+These tools help identify slow APIs, memory leaks, thread blocking, and CPU bottlenecks.
+
+Ninth, for applications with very high concurrency, I may use Reactive Programming with Spring WebFlux because it supports non-blocking processing and can handle more concurrent requests with fewer threads.
+
+Finally, for cloud or microservices environments, I would use Auto Scaling with Kubernetes or cloud platforms. During peak traffic, additional instances can be created automatically based on CPU or memory usage.
+
+So overall, Spring Boot performance optimization is achieved by combining caching, database tuning, async processing, monitoring, proper resource management, and scalable architecture together.”
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
